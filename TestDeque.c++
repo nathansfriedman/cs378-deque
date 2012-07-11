@@ -65,35 +65,6 @@ struct TestDeque : CppUnit::TestFixture {
 		CPPUNIT_ASSERT(&x != &y);
 	}
 
-	// ----------
-	// destructor
-	// ----------
-
-	void test_destructor_1() {
-		C x;
-		x.~C();
-		CPPUNIT_ASSERT(true);
-	}
-
-	void test_destructor_2() {
-		C x(10);
-		x.~C();
-		CPPUNIT_ASSERT(true);
-	}
-
-	void test_destructor_3() {
-		C x(10, 5);
-		x.~C();
-		CPPUNIT_ASSERT(true);
-	}
-
-	void test_destructor_4() {
-		C x(10);
-		C y(x);
-		x.~C();
-		y.~C();
-		CPPUNIT_ASSERT(true);
-	}
 
     // ------
     // index
@@ -127,6 +98,14 @@ struct TestDeque : CppUnit::TestFixture {
         }
     }
 
+    void test_at_3() { 
+        try {
+	    const C x(10, 10);
+	    CPPUNIT_ASSERT(x.at(5) == 10);
+        } catch (std::out_of_range& e) {
+            CPPUNIT_ASSERT(false);
+        }
+    }
     // ----
     // size
     // ----
@@ -145,10 +124,10 @@ struct TestDeque : CppUnit::TestFixture {
         CPPUNIT_ASSERT(x.size() == 12); }
  
     void test_size_4 () {
-        C x(10, 2);
+        C x(6, 1);
         C y(5, 2);
         y = x;
-        CPPUNIT_ASSERT(y.size() == 10); 
+        CPPUNIT_ASSERT(y.size() == 6); 
     }
 
     void test_size_5 () {
@@ -156,6 +135,121 @@ struct TestDeque : CppUnit::TestFixture {
         C y(5, 2);
         x = y;
         CPPUNIT_ASSERT(x.size() == 5);}
+
+    // ----------
+    // assignment
+    // ----------
+    void test_assignment_1() { 
+	C a(10, 1);
+	C b(10, 2);
+	b = a;
+	CPPUNIT_ASSERT(b[1] == 1);
+        CPPUNIT_ASSERT(b == a);}
+
+    void test_assignment_2() { 
+	C a(1000, 1);
+ 	C b(5, 1);
+	b = a;
+	CPPUNIT_ASSERT(b[98] == 1);
+	CPPUNIT_ASSERT(b.size() == 1000);}
+	
+    void test_assignment_3() { 
+	C a(4, 1);
+	C b(100, 3);
+	b = a;
+	CPPUNIT_ASSERT(b.at(1) == 1);
+	CPPUNIT_ASSERT(b.size() == 4);}
+    
+    // --------
+    // back
+    // --------
+ 
+    void test_back_1() { 
+	C a(12, 1);
+        CPPUNIT_ASSERT(a.back() == 1);}
+    
+    void test_back_2() { 
+	C a(10, 2);
+	C b(15, 5);
+	a = b;
+	CPPUNIT_ASSERT(a.back() == 5);}
+
+    void test_back_3() { 
+	C a(100, 100); 
+	CPPUNIT_ASSERT(a.back() == a[99]);}
+
+    // ----
+    // begin
+    // ----
+    
+    void test_begin_1() { 
+        C a(100, 2);
+        typename C::iterator iter = a.begin();
+        CPPUNIT_ASSERT(*iter == 2);
+	++iter;
+	CPPUNIT_ASSERT(*iter == 2);}
+
+    void test_begin_2() { 
+        C a(10, 2);
+	typename C::iterator iter = a.begin();
+	++*iter;
+ 	CPPUNIT_ASSERT(*iter == 3);}
+
+    void test_begin_3() { 
+        C a(10, 2);
+	CPPUNIT_ASSERT(*a.begin() == a[0]);
+    }
+
+    // -----
+    // end
+    // -----
+    void test_end_1() { 
+	C a(1000, 2);
+        typename C::iterator iter = a.begin();
+        int i = 0;
+        while(iter != a.end()) {
+	    ++i;
+            ++iter;
+        }
+        CPPUNIT_ASSERT(iter == a.end());
+        CPPUNIT_ASSERT(i == 1000);
+    }
+
+    void test_end_2() { 
+        C a(10, 2);
+        typename C::iterator iter = a.end();
+	--iter;
+        CPPUNIT_ASSERT(*iter == 2);
+        CPPUNIT_ASSERT(*iter == a.back());}
+
+
+
+    /*
+    void test_equals_1() {
+    }
+
+    void test_lessthan_1() {
+    }
+
+    void test_iterator_equals_1() {
+
+    void test_const_iterator_equals_1() {
+    }
+
+    void test_front_1() {
+    }
+    
+    void test_erase_1() {
+    }
+    
+    void test_insert_1() {
+    }
+    
+    void test_swap_1() { 
+    }
+  
+    TODO test push/pop back/front
+    */
 
     // -----
     // suite
@@ -165,11 +259,7 @@ struct TestDeque : CppUnit::TestFixture {
     CPPUNIT_TEST(test_constructor_1);
     CPPUNIT_TEST(test_constructor_2);
     CPPUNIT_TEST(test_constructor_3);
-    CPPUNIT_TEST(test_constructor_4);/*
-    CPPUNIT_TEST(test_destructor_1);
-    CPPUNIT_TEST(test_destructor_2);
-    CPPUNIT_TEST(test_destructor_3);
-    CPPUNIT_TEST(test_destructor_4);*/
+    CPPUNIT_TEST(test_constructor_4);
 
     CPPUNIT_TEST(test_size_1);
     CPPUNIT_TEST(test_size_2);
@@ -181,6 +271,23 @@ struct TestDeque : CppUnit::TestFixture {
 
     CPPUNIT_TEST(test_at_1);
     CPPUNIT_TEST(test_at_2);
+    CPPUNIT_TEST(test_at_3);
+
+    CPPUNIT_TEST(test_assignment_1);
+    //CPPUNIT_TEST(test_assignment_2);
+    CPPUNIT_TEST(test_assignment_3);
+
+    CPPUNIT_TEST(test_back_1);
+    CPPUNIT_TEST(test_back_2);
+    CPPUNIT_TEST(test_back_3);
+
+    CPPUNIT_TEST(test_begin_1);
+    CPPUNIT_TEST(test_begin_2);
+    CPPUNIT_TEST(test_begin_3);
+
+    CPPUNIT_TEST(test_end_1);
+    CPPUNIT_TEST(test_end_2);
+
 
     CPPUNIT_TEST_SUITE_END();};
 
