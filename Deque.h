@@ -127,7 +127,7 @@ class MyDeque {
 
         allocator_type _a;
 
-        // <your data>
+        // NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	pointer _f;
 	pointer _b;
 	pointer _e;
@@ -141,7 +141,6 @@ class MyDeque {
         // -----
 
         bool valid () const {
-            // <your code>
             return (!_f && !_b && !_e && !_l) || ((_f <= _b) && (_b <= _e) && (_e <= _l));}
 
     public:
@@ -167,13 +166,13 @@ class MyDeque {
                 // -----------
 
                 /**
-	 	 * <your documentation>
+	 	 * @return true if both iterators are indexing the same MyDeque and pointing to the same element
 	 	 */
                 friend bool operator == (const iterator& lhs, const iterator& rhs) {
                     return ((lhs.x == rhs.x) && (lhs.index == rhs.index));}
 
                 /**
-		 * <your documentation>
+		 * @return true if operator == returns false
 		 */
                 friend bool operator != (const iterator& lhs, const iterator& rhs) {
                     return !(lhs == rhs);}
@@ -183,7 +182,7 @@ class MyDeque {
                 // ----------
 
                 /**
-	 	 * <your documentation>
+	 	 * NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 		 */
                 friend iterator operator + (iterator lhs, difference_type rhs) {
                     return lhs += rhs;}
@@ -193,7 +192,7 @@ class MyDeque {
                 // ----------
 
                 /**
-	 	 * <your documentation>
+	 	 * NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	   	 */
                 friend iterator operator - (iterator lhs, difference_type rhs) {
                     return lhs -= rhs;}
@@ -221,7 +220,9 @@ class MyDeque {
                 // -----------
 
                 /**
-		 * <your documentation>
+		 * Two-arg constructor for the read/write iterator
+		 * @param p a pointer to the MyDeque this iterator is associated with
+		 * @param i an int value which represents the zero-based index this iterator should point at in the MyDeque
 		 */
                 iterator (MyDeque* p, int i) : index(i), x(p) {
                     assert(valid());}
@@ -236,7 +237,7 @@ class MyDeque {
                 // ----------
 
                 /**
-		 * <your documentation>
+		 * @return a reference to the element this iterator is pointing at
 		 */
                 reference operator * () const {
                     return x->at(index);}
@@ -246,7 +247,7 @@ class MyDeque {
                 // -----------
 
                 /**
-		 * <your documentation>
+		 * @return the address of the element this iterator is pointing at
  		 */
                 pointer operator -> () const {
                     return &**this;}
@@ -256,7 +257,7 @@ class MyDeque {
                 // -----------
 
                 /**
-		 * <your documentation>
+		 * @return the reference to this iterator after its index has been incremented
 		 */
                 iterator& operator ++ () {
 			++index;
@@ -264,7 +265,7 @@ class MyDeque {
                     return *this;}
 
                 /**
-		 * <your documentation>
+		 * @return a copy of this iterator, the original having had its index incremented
 		 */
                 iterator operator ++ (int) {
                     iterator x = *this;
@@ -277,7 +278,7 @@ class MyDeque {
                 // -----------
 
                 /**
-		 * <your documentation>
+		 * @return the reference to this iterator after its index has been decremented
 		 */
                 iterator& operator -- () {
 			--index;
@@ -285,7 +286,7 @@ class MyDeque {
                     return *this;}
 
                 /**
-		 * <your documentation>
+		 * @return a copy of this iterator, the original having had its index decremented
 		 */
                 iterator operator -- (int) {
                     iterator x = *this;
@@ -298,7 +299,8 @@ class MyDeque {
                 // -----------
 
                 /**
-		 * <your documentation>
+		 * @param d a difference_type value which represents the change in the index of the iterator
+		 * @return a reference to this iterator after it has had its index updated
 		 */
                 iterator& operator += (difference_type d) {
                     index += d;
@@ -310,7 +312,8 @@ class MyDeque {
                 // -----------
 
                 /**
-		 * <your documentation>
+		 * @param d a difference_type value which represents the change in the index of the iterator
+		 * @return a reference to this iterator after it has had its index updated
 		 */
                 iterator& operator -= (difference_type d) {
                     index -= d;
@@ -340,13 +343,13 @@ class MyDeque {
                 // -----------
 
                 /**
-		 * <your documentation>
+		 * @return true if both const_iterators are associated with the same MyDeque and are both pointing to the same element
 		 */
                 friend bool operator == (const const_iterator& lhs, const const_iterator& rhs) {
                     return ((lhs.x == rhs.x) && (lhs.index == rhs.index));}
 
                 /**
-		 * <your documentation>
+		 * @return true if the operator == returns false
 		 */
                 friend bool operator != (const const_iterator& lhs, const const_iterator& rhs) {
                     return !(lhs == rhs);}
@@ -356,7 +359,7 @@ class MyDeque {
                 // ----------
 
                 /**
-		 * <your documentation>
+		 * NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 		 */
                 friend const_iterator operator + (const_iterator lhs, difference_type rhs) {
                     return lhs += rhs;}
@@ -366,7 +369,7 @@ class MyDeque {
                 // ----------
 
                 /**
-		 * <your documentation>
+		 * <NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 		 */
                 friend const_iterator operator - (const_iterator lhs, difference_type rhs) {
                     return lhs -= rhs;}
@@ -394,7 +397,9 @@ class MyDeque {
                 // -----------
 
                 /**
-		 * <your documentation>
+		 * Two-arg constructor for the const_iterator
+		 * @param p read-only pointer to the MyDeque this iterator is associated
+		 * @param i int value which represents the index of the element this iterator will point to initially
 		 */
                 const_iterator (const MyDeque* p, int i) : x(p), index(i) {
                     assert(valid());}
@@ -409,7 +414,7 @@ class MyDeque {
                 // ----------
 
                 /**
-		 * <your documentation>
+		 * @return a read-only reference to the element this iterator is pointing at
 		 */
                 reference operator * () const {
                     return x->at(index);}
@@ -419,7 +424,7 @@ class MyDeque {
                 // -----------
 
                 /**
- 		 * <your documentation>
+ 		 * @return a read-only pointer to the element this iterator is pointing to
 		 */
                 pointer operator -> () const {
                     return &**this;}
@@ -429,7 +434,7 @@ class MyDeque {
                 // -----------
 
                 /**
-		 * <your documentation>
+		 * @return the reference to this iterator after its index has been incremented
 		 */
                 const_iterator& operator ++ () {
                     ++index;
@@ -437,7 +442,7 @@ class MyDeque {
                     return *this;}
 
                 /**
-		 * <your documentation>
+		 * @return a copy of this iterator, the original having had its index incremented
 		 */
                 const_iterator operator ++ (int) {
                     const_iterator x = *this;
@@ -450,7 +455,7 @@ class MyDeque {
                 // -----------
 
                 /**
-		 * <your documentation>
+		 * @return the reference to this iterator after its index has been decremented
 		 */
                 const_iterator& operator -- () {
                     --index;
@@ -458,7 +463,7 @@ class MyDeque {
                     return *this;}
 
                 /**
-		 * <your documentation>
+		 * @return a copy of this iterator, the original having had its index decremented
 		 */
                 const_iterator operator -- (int) {
                     const_iterator x = *this;
@@ -471,7 +476,8 @@ class MyDeque {
                 // -----------
 
                 /**
-		 * <your documentation>
+		 * @param d a difference_type value which represents the change in the index of the iterator
+		 * @return a reference to this iterator after it has had its index updated
 		 */
                 const_iterator& operator += (difference_type d) {
                     index += d;
@@ -483,7 +489,8 @@ class MyDeque {
                 // -----------
 
                 /**
-		 * <your documentation>
+		 * @param d a difference_type value which represents the change in the index of the iterator
+		 * @return a reference to this iterator after it has had its index updated
 		 */
                 const_iterator& operator -= (difference_type d) {
                     index -= d;
@@ -496,13 +503,13 @@ class MyDeque {
         // ------------
 
         /**
-	 * <your documentation>
+	 * NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	 */
         explicit MyDeque (const allocator_type& a = allocator_type()) : _a(a), _f(0), _b(0), _e(0), _l(0), _size(0) {
             assert(valid());}
 
         /**
-	 * <your documentation>
+	 * NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	 */
         explicit MyDeque (size_type s, const_reference v = value_type(), const allocator_type& a = allocator_type()) : _a(a), _size(s) {
             _f = _a.allocate(3 * s);
@@ -513,7 +520,7 @@ class MyDeque {
             assert(valid());}
 
         /**
-	* <your documentation>
+	* NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	*/
         MyDeque (const MyDeque& that) : _a(that._a), _size(that._size) {
             _f = _a.allocate(3 * _size);
@@ -528,6 +535,7 @@ class MyDeque {
         // ----------
 
         /**
+	* NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	* Resizes the array to zero, destroying all elements, then deallocates all memory assigned. 
 	*/
         ~MyDeque () {
@@ -567,16 +575,17 @@ class MyDeque {
         // -----------
 
         /**
+	* NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	* @param size_type index The index in the deque to retrieve
         * @return value_type The ith value in the deque
 	*/
         reference operator [] (size_type index) {
-		
-            return *(_b + index);
+	    return *(_b + index);
 	}
 
         /**
-	* <your documentation>
+	* @param size_type index The index in the deque to retrieve
+        * @return read-only reference to value_type The ith value in the deque
 	*/
         const_reference operator [] (size_type index) const {
             return const_cast<MyDeque*>(this)->operator[](index);}
@@ -586,16 +595,20 @@ class MyDeque {
         // --
 
         /**
-	* <your documentation>
+	* @param size_type index The index in the deque to retrieve
+        * @return value_type The ith value in the deque
+	* @throw out_of_range exception if the requested index does not exist
 	*/
         reference at (size_type index) {
-	    if ( index > _size ) {
+	    if ( index > _size || index < 0 ) {
                 throw std::out_of_range("MyDeque::at(index)");
             }
             return (this)->operator[](index);}
 
         /**
-	 * <your documentation>
+	 * @param size_type index The index in the deque to retrieve
+         * @return read-only reference to value_type The ith value in the deque
+	 * @throw out_of_range exception if the requested index does not exist
 	 */
         const_reference at (size_type index) const {
             return const_cast<MyDeque*>(this)->at(index);}
@@ -612,7 +625,7 @@ class MyDeque {
         }
 
         /**
-	 * <your documentation>
+	 * @return read-only reference to the last value in the MyDeque
 	 */
         const_reference back () const {
             return const_cast<MyDeque*>(this)->back();}
@@ -638,7 +651,7 @@ class MyDeque {
         // -----
 
         /**
-	* Removes all elements by resizing the deque to 0. s
+	* Removes all elements by resizing the deque to 0
 	*/
         void clear () {
             resize(0);
@@ -649,7 +662,7 @@ class MyDeque {
         // -----
 
         /**
-	* @return True if there are no elements in the deque. 
+	* @return True if there are no elements in the deque
 	*/
         bool empty () const {
             return !size();}
