@@ -688,26 +688,30 @@ class MyDeque {
         // -----
 
         /**
-	* <your documentation>
+	* removes one element from the MyDeque
+	* @param i iterator pointing to the element to be removed
+	* @return an iterator pointing to the space previously occupied by the removed element
 	*/
-        iterator erase (iterator) {
-            // <your code>
+        iterator erase (iterator i) {
+            iterator i_copy(i);
+	    std::copy(i +1, end(), i);
+	    resize(_size - 1);
             assert(valid());
-            return iterator();}
+            return i_copy;}
 
         // -----
         // front
         // -----
 
         /**
-	* <your documentation>
+	* @return reference to the first element in the MyDeque
 	*/
         reference front () {
             return at(0);
         }
 
         /**
-	* <your documentation>
+	* @return const_reference to the first element in the MyDeque
 	*/
         const_reference front () const {
             return const_cast<MyDeque*>(this)->front();}
@@ -717,19 +721,36 @@ class MyDeque {
         // ------
 
         /**
-	 * <your documentation>
+	 * insert one element into the MyDeque
+	 * @param i iterator pointing to the space the inserted element will occupy
+	 * @param v const_reference of the value to be inserted
+	 * @return an iterator pointing to the inserted element
 	 */
-        iterator insert (iterator, const_reference) {
-            // <your code>
-            assert(valid());
-            return iterator();}
+        iterator insert (iterator i, const_reference v) {
+            if (i == begin()) {
+		push_front(v);
+		return begin();
+	    }
+	    else if (i == end()) {
+		push_back(v);
+		return --(end());
+	    }
+	    else {
+		iterator i_copy(i);
+		resize(_size + 1);
+		std::copy(i, end(), i + 1);
+		*i_copy = v;
+		assert(valid());
+		return i_copy;
+	    }
+	}
 
         // ---
         // pop
         // ---
 
         /**
-	 * <your documentation>
+	 * removes the last element in the MyDeque and destroys it
 	 */
         void pop_back () {
             assert(!empty());
@@ -737,7 +758,7 @@ class MyDeque {
             assert(valid());}
 
         /**
- 	 * <your documentation>
+ 	 * removes the first element in the MyDeque and destroys it
 	 */
         void pop_front () {
             assert(!empty());
@@ -750,14 +771,15 @@ class MyDeque {
         // ----
 
         /**
-	 * <your documentation>
+	 * adds a new element to the back of the MyDeque
+	 * @param v const_reference of the value to be added
 	 */
-        void push_back (const_reference) {
+        void push_back (const_reference v) {
             resize(_size + 1, v);
             assert(valid());}
 
         /**
-	 * <your documentation>
+	 * NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	 */
         void push_front (const_reference) {
             //TODO write for multi-array
@@ -768,6 +790,7 @@ class MyDeque {
         // ------
 
         /**
+	* NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	* @param size_type s To resize to
         * @param const_reference v Value to fill new positions with if size is greater than current size
 	*/
@@ -799,7 +822,7 @@ class MyDeque {
         // ----
 
         /**
-	* <your documentation>
+	* swaps contents of two MyDeque containers
 	*/
         void swap (MyDeque& that) {
             if (_a == that._a) {
