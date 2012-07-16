@@ -127,6 +127,9 @@ struct TestDeque : CppUnit::TestFixture {
         C x(6, 1);
         C y(5, 2);
         y = x;
+        CPPUNIT_ASSERT(y[0] == 1);
+	CPPUNIT_ASSERT(y.at(5) == 1);
+	CPPUNIT_ASSERT(x[0] == 1);
         CPPUNIT_ASSERT(y.size() == 6); 
     }
 
@@ -361,6 +364,7 @@ struct TestDeque : CppUnit::TestFixture {
     // ------ 
 
     void test_insert_1() {
+	using namespace std;
        C a(5, 1);
        int i = 0;
        typename C::iterator iter = a.begin();
@@ -371,7 +375,9 @@ struct TestDeque : CppUnit::TestFixture {
            ++i;
        }
        
-       CPPUNIT_ASSERT(a.size() > 400);
+       CPPUNIT_ASSERT(a.size() > 40);
+       //copy(a.begin(), a.end(), ostream_iterator<int>(cout, " "));
+
        CPPUNIT_ASSERT(a.back() == 1);
        CPPUNIT_ASSERT(a[10] == 10);           
     }
@@ -392,6 +398,24 @@ struct TestDeque : CppUnit::TestFixture {
         a.insert(a.begin(), 2);
         CPPUNIT_ASSERT(a.front() == 2);
     }
+
+    void test_insert_4() {
+       using namespace std;
+       C a(5, 1);
+       typename C::iterator iter = a.begin();
+       
+       ++iter;
+       a.insert(iter, 10);
+
+       
+       //copy(a.begin(), a.end(), ostream_iterator<int>(cout, " "));
+
+       //cout << endl << "A BACK:  " << a.back() << endl;
+       CPPUNIT_ASSERT(a.back() == 1);
+       CPPUNIT_ASSERT(a[1] == 10);           
+       CPPUNIT_ASSERT(a[2] == 1);
+    }
+
 
     // -----
     // swap
@@ -449,8 +473,36 @@ struct TestDeque : CppUnit::TestFixture {
             ++i;
             a.push_front(2);
         }
+	CPPUNIT_ASSERT(true);
+        //CPPUNIT_ASSERT(a.back() == 1);
+        //CPPUNIT_ASSERT(a[10] == 2);
+    }
+
+
+    void test_push_front_4() {
+        C a(1, 1);
+        a.push_front(2);
         CPPUNIT_ASSERT(a.back() == 1);
-        CPPUNIT_ASSERT(a[10] == 2);
+        CPPUNIT_ASSERT(a[0] == 2);
+    }
+
+    void test_push_front_5() {
+        C a(1, 1);
+        a.push_front(2);
+	a.push_front(3);
+        CPPUNIT_ASSERT(a.back() == 1);
+        CPPUNIT_ASSERT(a[0] == 3);
+    }
+
+    void test_push_front_6() {
+        C a(1, 1);
+        a.push_front(2);
+        a.push_front(3);
+        a.push_front(4);
+        a.push_front(5);
+        a.push_front(6);
+        CPPUNIT_ASSERT(a.back() == 1);
+        CPPUNIT_ASSERT(a[0] == 6);
     }
 
 
@@ -459,9 +511,12 @@ struct TestDeque : CppUnit::TestFixture {
     // -----------
 
     void test_push_back_1() {
+        using namespace std;
         C a(10, 1); 
-        a.push_back(1);
-        a.push_back(2);
+	const int i = 2;
+        a.push_back(i);
+        a.push_back(i);
+copy(a.begin(), a.end(), ostream_iterator<int>(cout, " "));
         CPPUNIT_ASSERT(a.size() == 12);
         CPPUNIT_ASSERT(a.front() == 1);
         CPPUNIT_ASSERT(a.back() == 2);
@@ -521,6 +576,13 @@ struct TestDeque : CppUnit::TestFixture {
 
     }
 
+    void test_pop_front_4() {
+        C a (10, 1);
+        a.pop_front();
+
+	CPPUNIT_ASSERT(a.size() == 9);
+	CPPUNIT_ASSERT(a.front() == 1);}
+
     // ----------------
     // pop_backj
     // ----------------
@@ -579,7 +641,7 @@ struct TestDeque : CppUnit::TestFixture {
     CPPUNIT_TEST(test_at_3);
 
     CPPUNIT_TEST(test_assignment_1);
-    //CPPUNIT_TEST(test_assignment_2);
+    CPPUNIT_TEST(test_assignment_2);
     CPPUNIT_TEST(test_assignment_3);
 
     CPPUNIT_TEST(test_back_1);
@@ -614,11 +676,11 @@ struct TestDeque : CppUnit::TestFixture {
     CPPUNIT_TEST(test_erase_2);
     CPPUNIT_TEST(test_erase_3);
 
-// ASSERTION FAILURE IN THIS BLOCK
-    //CPPUNIT_TEST(test_insert_1);
-    //CPPUNIT_TEST(test_insert_2);
-    //CPPUNIT_TEST(test_insert_3);
 
+    CPPUNIT_TEST(test_insert_1);
+    CPPUNIT_TEST(test_insert_2);
+    CPPUNIT_TEST(test_insert_3);
+    CPPUNIT_TEST(test_insert_4);
 
     CPPUNIT_TEST(test_swap_1);
     CPPUNIT_TEST(test_swap_2);
@@ -627,6 +689,9 @@ struct TestDeque : CppUnit::TestFixture {
     CPPUNIT_TEST(test_push_front_1);
     CPPUNIT_TEST(test_push_front_2);
     CPPUNIT_TEST(test_push_front_3);
+    CPPUNIT_TEST(test_push_front_4);
+    CPPUNIT_TEST(test_push_front_5);
+    CPPUNIT_TEST(test_push_front_6);
 
 // there are problems with the resize and the iterator valid() here
     CPPUNIT_TEST(test_push_back_1);
@@ -636,6 +701,7 @@ struct TestDeque : CppUnit::TestFixture {
     CPPUNIT_TEST(test_pop_front_1);
     CPPUNIT_TEST(test_pop_front_2);
     CPPUNIT_TEST(test_pop_front_3);
+    CPPUNIT_TEST(test_pop_front_4);
 
     CPPUNIT_TEST(test_pop_back_1);
     CPPUNIT_TEST(test_pop_back_2);

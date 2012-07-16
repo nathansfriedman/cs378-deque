@@ -130,10 +130,8 @@ class MyDeque {
 
         allocator_type _a;
 
-	pointer _f;
 	pointer _b;
 	pointer _e;
-	pointer _l;
 
         size_type _size;
 
@@ -153,6 +151,22 @@ class MyDeque {
 
         bool valid () const {
             return (!_b && !_e && !_of && !_ob && !_oe && !_ol) || (((_of <= _ob) && (_ob <= _oe) && (_oe <= _ol)) && ((*_ob <= _b) && (*_oe <= _e)));}
+
+
+        MyDeque (const MyDeque& that, int rows) : _a(that._a), _size(that._size), _oa(that._oa), _arraySize(that._arraySize) {
+            _of = _oa.allocate(rows);
+            _ob = _of + (that._ob - that._of);
+            _oe = _of + (that._oe - that._of);
+            _ol = _of + rows;
+
+	    for(int i = 0; i <= (_oe - _ob); ++i) {
+	            *(_ob+i) = _a.allocate(_arraySize);	
+	    }
+	    _b = *_ob + (that._b - *(that._ob));
+       	    _e = *_oe + (that._e - *(that._oe));
+
+            uninitialized_copy(_a, that.begin(), that.end(), begin());
+            assert(valid());}
 
     public:
         // --------
@@ -518,7 +532,7 @@ class MyDeque {
         /**
 	 * NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	 */
-        explicit MyDeque (const allocator_type& a = allocator_type()) : _a(a), _f(0), _b(0), _e(0), _l(0), _size(0), _oa(a), _of(0), _ob(0), _oe(0), _ol(0), _arraySize(0) {
+        explicit MyDeque (const allocator_type& a = allocator_type()) : _a(a),  _b(0), _e(0),  _size(0), _oa(a), _of(0), _ob(0), _oe(0), _ol(0), _arraySize(0) {
             assert(valid());}
 
         /**
@@ -527,25 +541,36 @@ class MyDeque {
         explicit MyDeque (size_type s, const_reference v = value_type(), const allocator_type& a = allocator_type()) : _a(a), _size(s), _oa(a) {
             _of = _oa.allocate(3);
 	    _ob = _of + 1;
-	    _oe = _of + 2;
+	    _oe = _ob;
 	    _ol = _of + 3;
 
 	    *_ob = _a.allocate(3 * s);
             _b = *_ob + s;
             _e = *_ob + 2*s;
-            uninitialized_fill(_a, begin(), end(), v);
+	   
+            _arraySize = 3*s;
+            
+	    uninitialized_fill(_a, begin(), end(), v);
 
-	    _arraySize = 3*s;
+	    
             assert(valid());}
 
         /**
 	* NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	*/
-        MyDeque (const MyDeque& that) : _a(that._a), _size(that._size), _oa(that._oa) {
-            _f = _a.allocate(3 * _size);
-            _b = _f + _size;
-            _e = _f + 2*_size;
-            _l = _f + 3*_size;
+        MyDeque (const MyDeque& that) : _a(that._a), _size(that._size), _oa(that._oa), _arraySize(that._arraySize) {
+            _of = _oa.allocate(that._ol - that._of);
+            _ob = _of + (that._ob - that._of);
+            _oe = _of + (that._oe - that._of);
+            _ol = _of + (that._ol - that._of);
+
+	    for(int i = 0; i <= (_oe - _ob); ++i) {
+	            *(_ob+i) = _a.allocate(_arraySize);	
+	    }
+	    _b = *_ob + (that._b - *(that._ob));
+       	    _e = *_oe + (that._e - *(that._oe));
+
+
             uninitialized_copy(_a, that.begin(), that.end(), begin());
             assert(valid());}
 
@@ -560,9 +585,15 @@ class MyDeque {
         ~MyDeque () {
 		if (_b) {
 			clear();
-			_a.deallocate(_f, _l - _f);
+			int rowsDeall = _ob - _oe + 1;
+                        for (int i = 0; i < rowsDeall; ++i) {
+				_a.deallocate(*_ob, _arraySize);
+				++_ob;
+			}
+			_oa.deallocate(_of, _ol - _of);
 		}			
-            assert(valid());}
+	           //insert(valid());
+	}
 
         // ----------
         // operator =
@@ -582,7 +613,7 @@ class MyDeque {
                 resize(that.size());}
             else {
                 clear();
-		_size = that.size();
+		resize(that.size());
                 iterator eIter = uninitialized_copy(_a, that.begin(), that.end(), begin());
 		_e = &(*eIter);
 	    }
@@ -594,15 +625,14 @@ class MyDeque {
         // -----------
 
         /**
-	* NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	* @param size_type index The index in the deque to retrieve
         * @return value_type The ith value in the deque
 	*/
         reference operator [] (size_type index) {
 	    int row = (index + (_b - *_ob)) / _arraySize;
 	    int col = (index + (_b - *_ob)) % _arraySize;
-	
-	    return *(_b + index);
+	    return *(*(_ob+row)+col);
+
 	}
 
         /**
@@ -677,6 +707,8 @@ class MyDeque {
 	*/
         void clear () {
             resize(0);
+	    assert(_b == _e); 
+	    assert(_ob == _oe);
             assert(valid());}
 
         // -----
@@ -760,7 +792,7 @@ class MyDeque {
 	    else {
 		iterator i_copy(i);
 		resize(_size + 1);
-		std::copy(i, end(), i + 1);
+		std::copy_backward(i, end() -1, end());
 		*i_copy = v;
 		assert(valid());
 		return i_copy;
@@ -786,6 +818,7 @@ class MyDeque {
             assert(!empty());
             _a.destroy(_b);
 	    _b = &at(1);
+	    --_size;
             assert(valid());}
 
         // ----
@@ -797,14 +830,41 @@ class MyDeque {
 	 * @param v const_reference of the value to be added
 	 */
         void push_back (const_reference v) {
-            resize(_size + 1, v);
+            //resize(_size + 1, v);
+		resize(_size + 1);
+		*(end() - 1) = v;
             assert(valid());}
 
         /**
 	 * NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	 */
-        void push_front (const_reference) {
-            //TODO write for multi-array
+        void push_front (const_reference v) {
+	    if (*_ob != _b) {
+		//space available on this row
+		--_b;
+		*begin() = v;
+		++_size;
+	    }
+	    else if (_ob != _of) {
+		//space available for a new row
+		--_ob;
+		*_ob = _a.allocate(_arraySize);
+		_b = *_ob + _arraySize - 1;
+		*begin() = v;
+		++_size;
+	    }
+	    else {
+		//need to resize outer array
+		MyDeque x(*this, _ol - _of + 2);
+		swap(x);
+		std::copy_backward(_ob, _oe, _ol - 2);
+		_oe += 2;
+		++_ob;
+		*_ob = _a.allocate(_arraySize);
+		_b = *_ob + _arraySize - 1;
+		*begin() = v;
+		++_size;
+	    }
             assert(valid());}
 
         // ------
@@ -817,14 +877,45 @@ class MyDeque {
         * @param const_reference v Value to fill new positions with if size is greater than current size
 	*/
         void resize (size_type s, const_reference v = value_type()) {
+	    using namespace std;
             iterator eIter(this, _size);
+
             if( s == size())
 		return;
 	    else if (s < size()) {
                 eIter = destroy(_a, begin() + difference_type(s), end());
 		_e = &*eIter;
-	    } else 
-		uninitialized_fill(_a, end(), begin() + difference_type(s), v);
+		_oe = _ob + ((s + (_b - *_ob)) / _arraySize);
+	    } else {
+
+                // get hypothetical row number of bigger size's back element
+                int endRowNum = (s + (_b - *_ob)) / _arraySize;
+		//std::cout << "ARRAYSIZE:  " << _arraySize << std::endl << "endrow num:  " << endRowNum << std::endl;
+                if(endRowNum == (_oe - _ob)) {
+			_size = s;
+			eIter = uninitialized_fill(_a, end(), begin() + difference_type(s), v);
+			_e = &*eIter;
+                        // _oe stays the same
+		} else if (endRowNum < (_ol - _ob)) {
+			_size = s;			
+			int moreRows = endRowNum - (_oe - _ob);
+			for (int i = 0; i < moreRows; ++i) {
+				++_oe;
+				*_oe = _a.allocate(_arraySize);
+				
+			}
+			eIter = uninitialized_fill(_a, end(), begin() + difference_type(s), v);
+			_e = &*eIter;
+		} else {
+			int moreRows = endRowNum - (_ol - _ob) + 1;
+			int totalRows = _ol-_of + moreRows;
+			MyDeque x(*this, totalRows);
+			swap(x);
+			resize(s, v);
+		}
+            }
+	    //cout <<  "oe - ob  " << _oe - _ob << endl << "ol - oe  " << _ol - _oe << endl << "e - oe: " << _e - *_oe << endl << "b - ob: " << _b - *_ob << endl << endl;
+           // return (!_b && !_e && !_of && !_ob && !_oe && !_ol) || (((_of <= _ob) && (_ob <= _oe) && (_oe <= _ol)) && ((*_ob <= _b) && (*_oe <= _e)));}
             _size = s;
             assert(valid());}
 
@@ -848,11 +939,16 @@ class MyDeque {
 	*/
         void swap (MyDeque& that) {
             if (_a == that._a) {
-                std::swap(_f, that._f);
+
                 std::swap(_b, that._b);
                 std::swap(_e, that._e);
-                std::swap(_l, that._l);}
-            else {
+                std::swap(_of, that._of);
+                std::swap(_ob, that._ob);
+                std::swap(_oe, that._oe);
+                std::swap(_ol, that._ol);
+		std::swap(_arraySize, that._arraySize);
+                std::swap(_size, that._size);
+	    } else {
                 MyDeque x(*this);
                 *this = that;
                 that = x;}
