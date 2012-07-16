@@ -95,6 +95,9 @@ class MyDeque {
         typedef typename allocator_type::reference reference;
         typedef typename allocator_type::const_reference const_reference;
 
+	typedef typename allocator_type::template rebind<T*>::other outer_allocator;
+	typedef typename allocator_type::template rebind<T*>::other::pointer outer_pointer;
+
     public:
         // -----------
         // operator ==
@@ -127,7 +130,6 @@ class MyDeque {
 
         allocator_type _a;
 
-        // NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	pointer _f;
 	pointer _b;
 	pointer _e;
@@ -135,13 +137,22 @@ class MyDeque {
 
         size_type _size;
 
+	outer_allocator _oa;
+	outer_pointer _of;
+	outer_pointer _ob;
+	outer_pointer _oe;
+	outer_pointer _ol;
+
+	size_type _arraySize;
+	
+
     private:
         // -----
         // valid
         // -----
 
         bool valid () const {
-            return (!_f && !_b && !_e && !_l) || ((_f <= _b) && (_b <= _e) && (_e <= _l));}
+            return (!_b && !_e && !_of && !_ob && !_oe && !_ol) || (((_of <= _ob) && (_ob <= _oe) && (_oe <= _ol)) && ((*_ob <= _b) && (*_oe <= _e)));}
 
     public:
         // --------
@@ -507,24 +518,30 @@ class MyDeque {
         /**
 	 * NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	 */
-        explicit MyDeque (const allocator_type& a = allocator_type()) : _a(a), _f(0), _b(0), _e(0), _l(0), _size(0) {
+        explicit MyDeque (const allocator_type& a = allocator_type()) : _a(a), _f(0), _b(0), _e(0), _l(0), _size(0), _oa(a), _of(0), _ob(0), _oe(0), _ol(0), _arraySize(0) {
             assert(valid());}
 
         /**
 	 * NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	 */
-        explicit MyDeque (size_type s, const_reference v = value_type(), const allocator_type& a = allocator_type()) : _a(a), _size(s) {
-            _f = _a.allocate(3 * s);
-            _b = _f + s;
-            _e = _f + 2*s;
-            _l = _f + 3*s;
+        explicit MyDeque (size_type s, const_reference v = value_type(), const allocator_type& a = allocator_type()) : _a(a), _size(s), _oa(a) {
+            _of = _oa.allocate(3);
+	    _ob = _of + 1;
+	    _oe = _of + 2;
+	    _ol = _of + 3;
+
+	    *_ob = _a.allocate(3 * s);
+            _b = *_ob + s;
+            _e = *_ob + 2*s;
             uninitialized_fill(_a, begin(), end(), v);
+
+	    _arraySize = 3*s;
             assert(valid());}
 
         /**
 	* NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	*/
-        MyDeque (const MyDeque& that) : _a(that._a), _size(that._size) {
+        MyDeque (const MyDeque& that) : _a(that._a), _size(that._size), _oa(that._oa) {
             _f = _a.allocate(3 * _size);
             _b = _f + _size;
             _e = _f + 2*_size;
@@ -582,6 +599,9 @@ class MyDeque {
         * @return value_type The ith value in the deque
 	*/
         reference operator [] (size_type index) {
+	    int row = (index + (_b - *_ob)) / _arraySize;
+	    int col = (index + (_b - *_ob)) % _arraySize;
+	
 	    return *(_b + index);
 	}
 
