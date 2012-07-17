@@ -51,7 +51,6 @@ BI uninitialized_copy (A& a, II b, II e, BI x) {
             ++b;
             ++x;}}
     catch (...) {
-        std::cout << "UNINITIALIZED COOPY ERROR" << std::endl;
         destroy(a, p, x);
         throw;}
     return x;}
@@ -109,7 +108,7 @@ class MyDeque {
          * @return True if MyDeques are the same size and have the same contents
 	 */
         friend bool operator == (const MyDeque& lhs, const MyDeque& rhs) {
-            return (lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin());}
+            return (lhs.size() == 0 && rhs.size() == 0) || ((lhs.size() == rhs.size()) && std::equal(lhs.begin(), lhs.end(), rhs.begin()));}
 
         // ----------
         // operator <
@@ -158,6 +157,14 @@ class MyDeque {
             _ob = _of + (that._ob - that._of);
             _oe = _of + (that._oe - that._of);
             _ol = _of + rows;
+/*
+            uninitialized_copy(_oa, that._ob, (that._oe) + 1, _ob);
+	    _b = that._b;
+            _e = that._e;
+	    //_b = *_ob + (that._b - *(that._ob));
+       	    //_e = *_oe + (that._e - *(that._oe));
+            assert(valid());}*/
+
 
 	    for(int i = 0; i <= (_oe - _ob); ++i) {
 	            *(_ob+i) = _a.allocate(_arraySize);	
@@ -530,13 +537,16 @@ class MyDeque {
         // ------------
 
         /**
-	 * NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
+	 * @param allocator_type a The allocator to use
+         * Default constructor
 	 */
         explicit MyDeque (const allocator_type& a = allocator_type()) : _a(a),  _b(0), _e(0),  _size(0), _oa(a), _of(0), _ob(0), _oe(0), _ol(0), _arraySize(0) {
             assert(valid());}
 
         /**
-	 * NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
+	 * @param size_type s size of Deque
+         * @param const_reference v a value to fill the deque with
+         * @param allocator_type a The allocator to use
 	 */
         explicit MyDeque (size_type s, const_reference v = value_type(), const allocator_type& a = allocator_type()) : _a(a), _size(s), _oa(a) {
             _of = _oa.allocate(3);
@@ -556,7 +566,8 @@ class MyDeque {
             assert(valid());}
 
         /**
-	* NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
+	* @param MyDeque that
+        * Copy constructor - copy all data from that into a new MyDeque
 	*/
         MyDeque (const MyDeque& that) : _a(that._a), _size(that._size), _oa(that._oa), _arraySize(that._arraySize) {
             _of = _oa.allocate(that._ol - that._of);
@@ -579,7 +590,6 @@ class MyDeque {
         // ----------
 
         /**
-	* NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	* Resizes the array to zero, destroying all elements, then deallocates all memory assigned. 
 	*/
         ~MyDeque () {
@@ -614,7 +624,7 @@ class MyDeque {
             else {
                 clear();
 		resize(that.size());
-                iterator eIter = uninitialized_copy(_a, that.begin(), that.end(), begin());
+                iterator eIter = std::copy(that.begin(), that.end(), begin());
 		_e = &(*eIter);
 	    }
             assert(valid());
@@ -836,9 +846,11 @@ class MyDeque {
             assert(valid());}
 
         /**
-	 * NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
+	 * @param const_reference value to push front
+         * Push to front of deque
 	 */
         void push_front (const_reference v) {
+		using namespace std;
 	    if (*_ob != _b) {
 		//space available on this row
 		--_b;
@@ -857,7 +869,7 @@ class MyDeque {
 		//need to resize outer array
 		MyDeque x(*this, _ol - _of + 2);
 		swap(x);
-		std::copy_backward(_ob, _oe, _ol - 2);
+		std::copy_backward(_ob, _ol - 2, _ol);
 		_oe += 2;
 		++_ob;
 		*_ob = _a.allocate(_arraySize);
@@ -872,12 +884,10 @@ class MyDeque {
         // ------
 
         /**
-	* NEEDS UPDATING WITH ARRAY OF ARRAYS IMPLEMENTATION
 	* @param size_type s To resize to
         * @param const_reference v Value to fill new positions with if size is greater than current size
 	*/
         void resize (size_type s, const_reference v = value_type()) {
-	    using namespace std;
             iterator eIter(this, _size);
 
             if( s == size())
@@ -890,7 +900,7 @@ class MyDeque {
 
                 // get hypothetical row number of bigger size's back element
                 int endRowNum = (s + (_b - *_ob)) / _arraySize;
-		//std::cout << "ARRAYSIZE:  " << _arraySize << std::endl << "endrow num:  " << endRowNum << std::endl;
+
                 if(endRowNum == (_oe - _ob)) {
 			_size = s;
 			eIter = uninitialized_fill(_a, end(), begin() + difference_type(s), v);
@@ -914,8 +924,7 @@ class MyDeque {
 			resize(s, v);
 		}
             }
-	    //cout <<  "oe - ob  " << _oe - _ob << endl << "ol - oe  " << _ol - _oe << endl << "e - oe: " << _e - *_oe << endl << "b - ob: " << _b - *_ob << endl << endl;
-           // return (!_b && !_e && !_of && !_ob && !_oe && !_ol) || (((_of <= _ob) && (_ob <= _oe) && (_oe <= _ol)) && ((*_ob <= _b) && (*_oe <= _e)));}
+	    
             _size = s;
             assert(valid());}
 
